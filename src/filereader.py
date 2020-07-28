@@ -38,4 +38,4 @@ class SceneFile(object):
         """Receives filename as a string, imports file"""
         filePath = self._dir + "/" + fileName
         print(filePath)
-        System.importFile(filePath)
+        return System.importFile(filePath)

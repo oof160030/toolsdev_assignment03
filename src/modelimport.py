@@ -153,11 +153,14 @@ class modelimport(QtWidgets.QDialog):
         """Imports the selected file to the scene"""
         currentItem = self.files_list.currentItem()
         if(isinstance(currentItem,QtWidgets.QListWidgetItem)):
-            self.manager.importFile(currentItem.text())
+            newObject = self.manager.importFile(currentItem.text())
+            print(newObject)
 
     @QtCore.Slot()
     def _import_file_multiple(self):
         """Imports the selected file several times"""
+        """Prof. suggests I use pmc.ls() to access items,
+         and reference methods rather than import methods"""
         currentItem = self.files_list.currentItem()
         if (isinstance(currentItem, QtWidgets.QListWidgetItem)):
             xLoop = 0
