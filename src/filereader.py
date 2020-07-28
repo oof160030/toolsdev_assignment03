@@ -31,11 +31,14 @@ class SceneFile(object):
         """returns path to provided directory"""
         return Path(directory)
 
+    def getDir(self):
+        return self._dir
+
     def validateDir(self):
         return Path.exists(self.path(self._dir))
 
     def importFile(self, fileName):
         """Receives filename as a string, imports file"""
         filePath = self._dir + "/" + fileName
-        print(filePath)
+        """print(filePath)"""
         return System.importFile(filePath)

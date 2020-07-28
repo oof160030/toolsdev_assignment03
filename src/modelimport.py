@@ -3,6 +3,8 @@ from PySide2 import QtWidgets, QtCore, QtGui
 from shiboken2 import wrapInstance
 from pymel.core.system import Path
 
+import maya.cmds as cmds
+
 import filereader
 
 def maya_main_window():
@@ -131,10 +133,10 @@ class modelimport(QtWidgets.QDialog):
                 """Check for extension and filename"""
                 validExtension = self.ext_dropList.currentIndex() is 0 or str("." + fileSplit[1]) == self.ext_dropList.currentText()
                 validFileName = self.search_le.text() is "" or self.search_le.text() in fileSplit[0]
-                print(str("." + fileSplit[1]) + "<>" + self.ext_dropList.currentText())
+                """print(str("." + fileSplit[1]) + "<>" + self.ext_dropList.currentText())
                 print(validExtension)
                 print(validFileName)
-                print("======")
+                print("======")"""
                 if validExtension and validFileName:
                     self._addListItem(file)
 
@@ -153,8 +155,11 @@ class modelimport(QtWidgets.QDialog):
         """Imports the selected file to the scene"""
         currentItem = self.files_list.currentItem()
         if(isinstance(currentItem,QtWidgets.QListWidgetItem)):
-            newObject = self.manager.importFile(currentItem.text())
-            print(newObject)
+            stringToFile = self.manager.getDir() + "\\" + currentItem.text()
+            """print(stringToFile)"""
+            newNodes = cmds.file(stringToFile, i=True, gr=True, gn=currentItem.text().split(".")[0] + "_ImportGroup",
+                                 mnc=True, pr=False, rdn=False, rnn=True)
+            """newObject = self.manager.importFile(currentItem.text())"""
 
     @QtCore.Slot()
     def _import_file_multiple(self):
@@ -165,7 +170,19 @@ class modelimport(QtWidgets.QDialog):
         if (isinstance(currentItem, QtWidgets.QListWidgetItem)):
             xLoop = 0
             while xLoop < self.m_import_spinbox.value():
-                self.manager.importFile(currentItem.text())
+                """self.manager.importFile(currentItem.text())"""
+                stringToFile = self.manager.getDir() + "\\" + currentItem.text()
+                groupName = currentItem.text().split(".")[0] + "_ImportGroup"
+                newNodes = cmds.file(stringToFile, i=True, gr=True,
+                                     gn=groupName + str(xLoop+1),
+                                     pr=False, rdn=False, rnn=True)
+                for node in newNodes:
+                    """print(cmds.ls(node, sn=True)[0])"""
+                    nodePath = cmds.ls(node, sn=True)[0]
+                    nodeName = nodePath.split("|")[-1]
+                    """print(nodeName)"""
+                    if groupName in nodeName:
+                        cmds.xform(node,t=(0,0,2*xLoop))
                 xLoop += 1
 
     @QtCore.Slot()
