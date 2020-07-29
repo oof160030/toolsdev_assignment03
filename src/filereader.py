@@ -9,8 +9,9 @@ class SceneFile(object):
     files in the folder provided
 
     Attributes:
-        dir - the directory to the file
-        files[] - list of all valid files in the folder
+        _dir - the directory to the file
+        targetFolder - the Path object representing _dir
+        fileList[] - list of all valid files in the folder
     """
 
     def __init__(self, dir=''):
@@ -20,10 +21,12 @@ class SceneFile(object):
         self.fileList = []
 
     def setTargetFolder(self, dir):
+        """Saves a given file path and directory for later use"""
         self.targetFolder = self.path(dir)
         self._dir = dir
 
     def getFileList(self):
+        """Retrieve a list of all files in the target folder"""
         self.fileList = listdir(self._dir)
         return self.fileList
 
@@ -35,6 +38,7 @@ class SceneFile(object):
         return self._dir
 
     def validateDir(self):
+        """Checks if the current target directory exists"""
         return Path.exists(self.path(self._dir))
 
     def importFile(self, fileName):

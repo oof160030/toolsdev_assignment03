@@ -13,9 +13,7 @@ def maya_main_window():
     return wrapInstance(long(main_window), QtWidgets.QWidget)
 
 class modelimport(QtWidgets.QDialog):
-    """This class handles creates a UI object that reads files from a UI and generates a list for it.
-    Allows for file imports and directory traversal
-    """
+    """This class creates a ser interface that enables file viewing and importing"""
     def __init__(self):
         '''Constructor'''
         #Makes constructor compatible with both python 2 and 3
@@ -33,8 +31,6 @@ class modelimport(QtWidgets.QDialog):
         self.create_widgets()
         self.create_layout()
         self.create_connections()
-
-
 
     def create_widgets(self):
         """Create Widgets for UI"""
@@ -97,8 +93,8 @@ class modelimport(QtWidgets.QDialog):
 
         self.setLayout(self.UI_layout)
 
-
     def create_connections(self):
+        """Creates connections between widgets and methods"""
         self.browse_btn.clicked.connect(self.browse)
         self.import_btn.clicked.connect(self._import_file)
         self.filter_btn.clicked.connect(self._refreshFiles)
@@ -122,26 +118,21 @@ class modelimport(QtWidgets.QDialog):
             for file in listOfFiles:
                 self._addListItem(file)
 
-
     def _refreshFiles(self):
-        """Refreshes the list of files, applying filter by extension and name"""
+        """Refreshes the list of files, applying filters for extension and name"""
         if(self.manager.validateDir()):
             self.files_list.clear()
             listOfFiles = self.manager.getFileList()
+
             for file in listOfFiles:
                 fileSplit = file.split(".")
-                """Check for extension and filename"""
                 validExtension = self.ext_dropList.currentIndex() is 0 or str("." + fileSplit[1]) == self.ext_dropList.currentText()
                 validFileName = self.search_le.text() is "" or self.search_le.text() in fileSplit[0]
-                """print(str("." + fileSplit[1]) + "<>" + self.ext_dropList.currentText())
-                print(validExtension)
-                print(validFileName)
-                print("======")"""
                 if validExtension and validFileName:
                     self._addListItem(file)
 
-
     def _addListItem(self, fileName):
+        """Adds a list element to our current file list (including assigning a specific icon)"""
         fileExt = fileName.split(".")[1]
         if(fileExt == 'ma'):
             QtWidgets.QListWidgetItem(QtGui.QIcon(str(self.myPath + "\ma_icon.png")),fileName, self.files_list)
@@ -157,38 +148,33 @@ class modelimport(QtWidgets.QDialog):
         if(isinstance(currentItem,QtWidgets.QListWidgetItem)):
             stringToFile = self.manager.getDir() + "\\" + currentItem.text()
             """print(stringToFile)"""
-            newNodes = cmds.file(stringToFile, i=True, gr=True, gn=currentItem.text().split(".")[0] + "_ImportGroup",
+            cmds.file(stringToFile, i=True, gr=True, gn=currentItem.text().split(".")[0] + "_ImportGroup",
                                  mnc=True, pr=False, rdn=False, rnn=True)
-            """newObject = self.manager.importFile(currentItem.text())"""
 
     @QtCore.Slot()
     def _import_file_multiple(self):
-        """Imports the selected file several times"""
-        """Prof. suggests I use pmc.ls() to access items,
-         and reference methods rather than import methods"""
+        """Repeats a file import up to 10 times for faster use"""
         currentItem = self.files_list.currentItem()
         if (isinstance(currentItem, QtWidgets.QListWidgetItem)):
             xLoop = 0
             while xLoop < self.m_import_spinbox.value():
-                """self.manager.importFile(currentItem.text())"""
                 stringToFile = self.manager.getDir() + "\\" + currentItem.text()
                 groupName = currentItem.text().split(".")[0] + "_ImportGroup"
-                newNodes = cmds.file(stringToFile, i=True, gr=True,
-                                     gn=groupName + str(xLoop+1),
+                newNodes = cmds.file(stringToFile, i=True, gr=True, gn=groupName + str(xLoop+1),
                                      pr=False, rdn=False, rnn=True)
                 for node in newNodes:
-                    """print(cmds.ls(node, sn=True)[0])"""
                     nodePath = cmds.ls(node, sn=True)[0]
                     nodeName = nodePath.split("|")[-1]
-                    """print(nodeName)"""
                     if groupName in nodeName:
                         cmds.xform(node,t=(0,0,2*xLoop))
                 xLoop += 1
 
     @QtCore.Slot()
     def _clearFilter(self):
+        """Resets the text filter for files"""
         self.search_le.setText("")
         self._refreshFiles()
 
     def spinbox_edit(self):
+        """Updates the multi-import button label based on number to import"""
         self.m_import_btn.setText("Import " + str(self.m_import_spinbox.value()) + " Copies of File")
